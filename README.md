@@ -1,0 +1,1 @@
+Personal playground to go through [LearnOpenGL](http://learnopengl.com).
