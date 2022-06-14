@@ -12,12 +12,20 @@ void main()
 	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
 })";
 
-const char* p_fragShaderSource =
+const char* p_fragOrangeShaderSource =
 R"(#version 330 core
 out vec4 FragColor;
 void main()
 {
 	FragColor = vec4(1.0, 0.5, 0.2, 1.0);
+})";
+
+const char* p_fragYellowShaderSource =
+R"(#version 330 core
+out vec4 FragColor;
+void main()
+{
+	FragColor = vec4(1.0, 0.71, 0.2, 1.0);
 })";
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -126,37 +134,67 @@ int main()
 		return -1;
 	}
 
-	unsigned int _fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(_fragShader, 1, &p_fragShaderSource, nullptr);
-	glCompileShader(_fragShader);
+	unsigned int _fragOrangeShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(_fragOrangeShader, 1, &p_fragOrangeShaderSource, nullptr);
+	glCompileShader(_fragOrangeShader);
 
-	glGetShaderiv(_fragShader, GL_COMPILE_STATUS, &_shaderCompileStatus);
+	glGetShaderiv(_fragOrangeShader, GL_COMPILE_STATUS, &_shaderCompileStatus);
 	if (!_shaderCompileStatus)
 	{
 		std::memset(_info, 0, sizeof(_info));
-		glGetShaderInfoLog(_fragShader, 512, nullptr, _info);
+		glGetShaderInfoLog(_fragOrangeShader, 512, nullptr, _info);
+		std::cout << "Error compiling fragment shader: " << _info;
+		glfwTerminate();
+		return -1;
+	}
+	
+	unsigned int _fragYellowShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(_fragYellowShader, 1, &p_fragYellowShaderSource, nullptr);
+	glCompileShader(_fragYellowShader);
+
+	glGetShaderiv(_fragYellowShader, GL_COMPILE_STATUS, &_shaderCompileStatus);
+	if (!_shaderCompileStatus)
+	{
+		std::memset(_info, 0, sizeof(_info));
+		glGetShaderInfoLog(_fragYellowShader, 512, nullptr, _info);
 		std::cout << "Error compiling fragment shader: " << _info;
 		glfwTerminate();
 		return -1;
 	}
 
-	unsigned int _shaderProgram = glCreateProgram();
-	glAttachShader(_shaderProgram, _vertexShader);
-	glAttachShader(_shaderProgram, _fragShader);
-	glLinkProgram(_shaderProgram);
+	unsigned int _orangeShaderProgram = glCreateProgram();
+	glAttachShader(_orangeShaderProgram, _vertexShader);
+	glAttachShader(_orangeShaderProgram, _fragOrangeShader);
+	glLinkProgram(_orangeShaderProgram);
 
-	glGetShaderiv(_fragShader, GL_LINK_STATUS, &_shaderCompileStatus);
+	glGetShaderiv(_orangeShaderProgram, GL_LINK_STATUS, &_shaderCompileStatus);
 	if (!_shaderCompileStatus)
 	{
 		std::memset(_info, 0, sizeof(_info));
-		glGetProgramInfoLog(_shaderProgram, 512, nullptr, _info);
+		glGetProgramInfoLog(_orangeShaderProgram, 512, nullptr, _info);
+		std::cout << "Error linking shaders: " << _info;
+		glfwTerminate();
+		return -1;
+	}
+	
+	unsigned int _yellowShaderProgram = glCreateProgram();
+	glAttachShader(_yellowShaderProgram, _vertexShader);
+	glAttachShader(_yellowShaderProgram, _fragYellowShader);
+	glLinkProgram(_yellowShaderProgram);
+
+	glGetShaderiv(_yellowShaderProgram, GL_LINK_STATUS, &_shaderCompileStatus);
+	if (!_shaderCompileStatus)
+	{
+		std::memset(_info, 0, sizeof(_info));
+		glGetProgramInfoLog(_yellowShaderProgram, 512, nullptr, _info);
 		std::cout << "Error linking shaders: " << _info;
 		glfwTerminate();
 		return -1;
 	}
 
 	glDeleteShader(_vertexShader);
-	glDeleteShader(_fragShader);
+	glDeleteShader(_orangeShaderProgram);
+	glDeleteShader(_yellowShaderProgram);
 
 	// Would this be necessary in real apps?
 	glBindVertexArray(0);
@@ -168,9 +206,10 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		processInput(_window);
 
-		glUseProgram(_shaderProgram);
+		glUseProgram(_orangeShaderProgram);
 		glBindVertexArray(_VAO[0]);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glUseProgram(_yellowShaderProgram);
 		glBindVertexArray(_VAO[1]);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glBindVertexArray(0);
