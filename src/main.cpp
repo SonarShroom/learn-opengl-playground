@@ -131,7 +131,7 @@ int main()
 	glAttachShader(_shaderProgram, _fragShader);
 	glLinkProgram(_shaderProgram);
 
-	glGetShaderiv(_fragShader, GL_LINK_STATUS, &_shaderCompileStatus);
+	glGetShaderiv(_shaderProgram, GL_LINK_STATUS, &_shaderCompileStatus);
 	if (!_shaderCompileStatus)
 	{
 		std::memset(_info, 0, sizeof(_info));
