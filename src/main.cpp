@@ -68,10 +68,12 @@ int main()
 	glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
 	
 	float _vertices[] = {
-		.5f, .5f, .0f,		// Top right
-		.5f, -.5f, .0f,		// Bot right
-		-.5f, -.5f, .0f,	// Bot left
-		-.5f, .5f, .0f,		// Top left
+		.7f, .2f, .0f,
+		.2f, .2f, .0f,
+		.45f, -.2f, .0f,
+		-.7f, -.2f, .0f,
+		-.2f, -.2f, .0f,
+		-.45f, .2f, .0f
 	};
 	unsigned int _indices[] = {
 		0, 1, 3,
@@ -147,9 +149,7 @@ int main()
 	// Would this be necessary in real apps?
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	while (!glfwWindowShouldClose(_window))
 	{
@@ -158,7 +158,7 @@ int main()
 
 		glUseProgram(_shaderProgram);
 		glBindVertexArray(_VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(_window);
