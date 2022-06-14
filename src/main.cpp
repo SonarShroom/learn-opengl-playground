@@ -67,32 +67,44 @@ int main()
 	glClearColor(.2f, .3f, .3f, .0f);
 	glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
 	
-	float _vertices[] = {
+	float _vertices1[] = {
 		.7f, .2f, .0f,
 		.2f, .2f, .0f,
-		.45f, -.2f, .0f,
+		.45f, -.2f, .0f
+	};
+
+	float _vertices2[] = {
 		-.7f, -.2f, .0f,
 		-.2f, -.2f, .0f,
 		-.45f, .2f, .0f
 	};
+
 	unsigned int _indices[] = {
 		0, 1, 3,
 		1, 2, 3
 	};
 
-	unsigned int _VAO = 0;
-	glGenVertexArrays(1, &_VAO);
-	glBindVertexArray(_VAO);
+	unsigned int _VAO[2] = {0, 0};
+	glGenVertexArrays(2, _VAO);
+	glBindVertexArray(_VAO[0]);
 
-	unsigned int _VBO = 0;
-	glGenBuffers(1, &_VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices), _vertices, GL_STATIC_DRAW);
+	unsigned int _VBO[2] = {0, 0};
+	glGenBuffers(2, _VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, _VBO[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices1), _vertices1, GL_STATIC_DRAW);
 
 	unsigned int _EBO = 0;
 	glGenBuffers(1, &_EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices), _indices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	
+	glBindVertexArray(_VAO[1]);
+
+	glBindBuffer(GL_ARRAY_BUFFER, _VBO[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices2), _vertices2, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -149,7 +161,7 @@ int main()
 	// Would this be necessary in real apps?
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	while (!glfwWindowShouldClose(_window))
 	{
@@ -157,8 +169,10 @@ int main()
 		processInput(_window);
 
 		glUseProgram(_shaderProgram);
-		glBindVertexArray(_VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(_VAO[0]);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glBindVertexArray(_VAO[1]);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(_window);
