@@ -61,7 +61,7 @@ int main()
 		-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f	// Top left
 	};
 	unsigned int _indices[] = {
-		// 0, 1, 3,
+		0, 1, 3,
 		1, 2, 3
 	};
 
@@ -85,6 +85,9 @@ int main()
 	glEnableVertexAttribArray(1);
 
 	Graphics::Shader ourShader("shaders/vertShader.vert", "shaders/fragShader.frag");
+	constexpr float _xOffset = 0.5f;
+	ourShader.Use(); // Remember, the program must be in use so that OpenGL sets the data correctly in memory.
+	ourShader.SetFloat("xOffset", _xOffset);
 
 	// Would this be necessary in real apps?
 	glBindVertexArray(0);
@@ -100,7 +103,7 @@ int main()
 
 		ourShader.Use();
 		glBindVertexArray(_VAO);
-		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(_window);
