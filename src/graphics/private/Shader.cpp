@@ -47,7 +47,7 @@ Shader::Shader(const std::string& vertexShaderPath, const std::string& fragShade
 	unsigned int _fragShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 	int _shaderCompileStatus = 0;
 	char _info[512] = {0};
-	
+
 	glShaderSource(_vertexShaderID, 1, &_cStyleVertexCode, nullptr);
 	glCompileShader(_vertexShaderID);
 
@@ -85,7 +85,7 @@ Shader::Shader(const std::string& vertexShaderPath, const std::string& fragShade
 		std::cout << "Error linking shaders: " << _info;
 		return;
 	}
-	
+
 	programID = _shaderProgram;
 	glDeleteShader(_vertexShaderID);
 	glDeleteShader(_fragShaderID);

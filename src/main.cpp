@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "graphics/Shader.h"
+#include "graphics/ImageImpl.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -55,10 +56,10 @@ int main()
 	glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
 	
 	float _vertices[] = {
-		0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f,	// Top right
-		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,	// Bot right
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,	// Bot left
-		-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f	// Top left
+		0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,		// Top right
+		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,	// Bot right
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,	// Bot left
+		-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f		// Top left
 	};
 	unsigned int _indices[] = {
 		0, 1, 3,
@@ -79,12 +80,53 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices), _indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	stbi_set_flip_vertically_on_load(true);
+	unsigned int _contTextureID = 0;
+	int _width = 0;
+	int _height = 0;
+	int _nChannels = 0;
+	unsigned char* _contTexData = stbi_load("images/container.jpg", &_width, &_height, &_nChannels, 0);
+
+	if (_contTexData)
+	{
+		glGenTextures(1, &_contTextureID);
+		glBindTexture(GL_TEXTURE_2D, _contTextureID); // Binds to the currently active texture unit
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, _contTexData);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load the texture data in images/container.jpg.\n";
+	}
+	stbi_image_free(_contTexData);
+	
+	unsigned int _faceTextureID = 0;
+	unsigned char* _faceTexData = stbi_load("images/awesomeface.png", &_width, &_height, &_nChannels, 0);
+
+	if (_faceTexData)
+	{
+		glGenTextures(1, &_faceTextureID);
+		glBindTexture(GL_TEXTURE_2D, _faceTextureID); // Binds to the currently active texture unit
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _faceTexData);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load the texture data in images/awesomeface.png.\n";
+	}
+	stbi_image_free(_faceTexData);
 
 	Graphics::Shader ourShader("shaders/vertShader.vert", "shaders/fragShader.frag");
+	ourShader.Use();
+	ourShader.SetInt("Texture1", 0);
+	ourShader.SetInt("Texture2", 1);
 
 	// Would this be necessary in real apps?
 	glBindVertexArray(0);
@@ -99,6 +141,11 @@ int main()
 		processInput(_window);
 
 		ourShader.Use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, _contTextureID);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, _faceTextureID);
+
 		glBindVertexArray(_VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
