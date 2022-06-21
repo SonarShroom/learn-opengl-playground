@@ -13,11 +13,30 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+float p_FragShaderRatio = 0.0f;
 void processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
+	
+	if (glfwGetKey(window, GLFW_KEY_UP))
+	{
+		p_FragShaderRatio += 0.01f;
+		if (p_FragShaderRatio > 1.0f)
+		{
+			p_FragShaderRatio = 1.0f;
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_DOWN))
+	{
+		p_FragShaderRatio -= 0.01f;
+		if (p_FragShaderRatio < 0.0f)
+		{
+			p_FragShaderRatio = 0.0f;
+		}
 	}
 }
 
@@ -56,10 +75,10 @@ int main()
 	glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
 	
 	float _vertices[] = {
-		0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.6f, 0.6f,		// Top right
-		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.6f, 0.4f,	// Bot right
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.4f, 0.4f,	// Bot left
-		-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.4f, 0.6f		// Top left
+		0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,		// Top right
+		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,	// Bot right
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,	// Bot left
+		-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f		// Top left
 	};
 	unsigned int _indices[] = {
 		0, 1, 3,
@@ -98,7 +117,6 @@ int main()
 	{
 		glGenTextures(1, &_contTextureID);
 		glBindTexture(GL_TEXTURE_2D, _contTextureID); // Binds to the currently active texture unit
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, _contTexData);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
@@ -115,7 +133,6 @@ int main()
 	{
 		glGenTextures(1, &_faceTextureID);
 		glBindTexture(GL_TEXTURE_2D, _faceTextureID); // Binds to the currently active texture unit
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _faceTexData);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
@@ -127,8 +144,6 @@ int main()
 
 	Graphics::Shader ourShader("shaders/vertShader.vert", "shaders/fragShader.frag");
 	ourShader.Use();
-	ourShader.SetInt("Texture1", 0);
-	ourShader.SetInt("Texture2", 1);
 
 	// Would this be necessary in real apps?
 	glBindVertexArray(0);
@@ -147,6 +162,9 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, _contTextureID);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, _faceTextureID);
+		ourShader.SetInt("Texture1", 0);
+		ourShader.SetInt("Texture2", 1);
+		ourShader.SetFloat("Ratio", p_FragShaderRatio);
 
 		glBindVertexArray(_VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
