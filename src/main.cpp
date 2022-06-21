@@ -56,10 +56,10 @@ int main()
 	glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
 	
 	float _vertices[] = {
-		0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 2.0f, 2.0f,		// Top right
-		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, 0.0f,	// Bot right
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,	// Bot left
-		-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 2.0f		// Top left
+		0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.6f, 0.6f,		// Top right
+		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.6f, 0.4f,	// Bot right
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.4f, 0.4f,	// Bot left
+		-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.4f, 0.6f		// Top left
 	};
 	unsigned int _indices[] = {
 		0, 1, 3,
@@ -98,8 +98,7 @@ int main()
 	{
 		glGenTextures(1, &_contTextureID);
 		glBindTexture(GL_TEXTURE_2D, _contTextureID); // Binds to the currently active texture unit
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, _contTexData);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
@@ -116,8 +115,7 @@ int main()
 	{
 		glGenTextures(1, &_faceTextureID);
 		glBindTexture(GL_TEXTURE_2D, _faceTextureID); // Binds to the currently active texture unit
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _faceTexData);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
