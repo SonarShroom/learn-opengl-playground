@@ -1,5 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <cstring>
 #include <cmath>
@@ -23,6 +26,8 @@ void processInput(GLFWwindow* window)
 
 int main()
 {
+	
+	
 	if (glfwInit() == GLFW_FALSE)
 	{
 		std::cout << "Error initializing GLFW. Exiting.";
@@ -141,6 +146,10 @@ int main()
 		processInput(_window);
 
 		ourShader.Use();
+		glm::mat4 _trans(1.0f);
+		_trans = glm::translate(_trans, glm::vec3(0.5f, -0.5f, 0.0f));
+		_trans = glm::rotate(_trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		ourShader.SetMatrix("Transform", _trans);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _contTextureID);
 		glActiveTexture(GL_TEXTURE1);

@@ -14,6 +14,7 @@ set(DEPS_DIR ${CMAKE_CURRENT_LIST_DIR}/deps)
 set(GLFW_DIR ${DEPS_DIR}/glfw)
 set(GLAD_DIR ${DEPS_DIR}/glad)
 set(STB_DIR ${DEPS_DIR}/stb)
+set(GLM_DIR ${DEPS_DIR}/glm)
 
 ## GLFW
 # Required as per https://www.glfw.org/docs/latest/build_guide.html#build_link_cmake_source 
@@ -34,6 +35,9 @@ target_include_directories(stb INTERFACE
 	${STB_DIR}
 )
 
+## GLM
+add_subdirectory(${GLM_DIR})
+
 ## Main target
 add_executable(${PROJECT_NAME}
 	${LearnOpenGLPlayground_SOURCE_DIR}/main.cpp
@@ -44,6 +48,7 @@ target_link_libraries(${PROJECT_NAME}
 	glad
 	glfw
 	stb
+	glm
 )
 
 install(
