@@ -145,10 +145,11 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		processInput(_window);
 
+		float _time = glfwGetTime();
 		ourShader.Use();
 		glm::mat4 _trans(1.0f);
-		_trans = glm::rotate(_trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 		_trans = glm::translate(_trans, glm::vec3(0.5f, -0.5f, 0.0f));
+		_trans = glm::rotate(_trans, _time, glm::vec3(0.0f, 0.0f, 1.0f));
 		ourShader.SetMatrix("Transform", _trans);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _contTextureID);
@@ -156,6 +157,12 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, _faceTextureID);
 
 		glBindVertexArray(_VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		_trans = glm::mat4(1.0f);
+		_trans = glm::translate(_trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+		_trans = glm::scale(_trans, glm::vec3(std::sin(_time)));
+		ourShader.SetMatrix("Transform", _trans);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
