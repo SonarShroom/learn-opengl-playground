@@ -147,8 +147,8 @@ int main()
 
 		ourShader.Use();
 		glm::mat4 _trans(1.0f);
-		_trans = glm::translate(_trans, glm::vec3(0.5f, -0.5f, 0.0f));
 		_trans = glm::rotate(_trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		_trans = glm::translate(_trans, glm::vec3(0.5f, -0.5f, 0.0f));
 		ourShader.SetMatrix("Transform", _trans);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _contTextureID);
