@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 
+#include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 
 namespace Graphics
@@ -109,6 +110,11 @@ void Shader::SetInt(const std::string& propertyName, int value)
 void Shader::SetFloat(const std::string& propertyName, float value)
 {
 	glUniform1f(glGetUniformLocation(programID, propertyName.c_str()), value);
+}
+
+void Shader::SetMatrix(const std::string& propertyName, glm::mat4 value)
+{
+	glUniformMatrix4fv(glGetUniformLocation(programID, propertyName.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 }
 
 }
