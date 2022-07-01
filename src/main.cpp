@@ -56,15 +56,61 @@ int main()
 		return -1;
 	}
 	
-	glViewport(0, 0, 800, 600);
+	float _viewportWidth = 800.0f, _viewportHeight = 600.0f;
+	glViewport(0, 0, _viewportWidth, _viewportHeight);
+	glEnable(GL_DEPTH_TEST);
 	glClearColor(.2f, .3f, .3f, .0f);
 	glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
 	
-	float _vertices[] = {
+	/*float _vertices[] = {
 		0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,		// Top right
 		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,	// Bot right
 		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,	// Bot left
 		-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f		// Top left
+	};*/
+	
+	float _vertices[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 	unsigned int _indices[] = {
 		0, 1, 3,
@@ -80,17 +126,17 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices), _vertices, GL_STATIC_DRAW);
 
-	unsigned int _EBO = 0;
-	glGenBuffers(1, &_EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices), _indices, GL_STATIC_DRAW);
+	//unsigned int _EBO = 0;
+	//glGenBuffers(1, &_EBO);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices), _indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
+	// glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	// glEnableVertexAttribArray(2);
 
 	stbi_set_flip_vertically_on_load(true);
 	unsigned int _contTextureID = 0;
@@ -140,23 +186,50 @@ int main()
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+	glm::mat4 _view(1.0f);
+	_view = glm::translate(_view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+	glm::mat4 _projection;
+	_projection = glm::perspective(glm::radians(45.0f), _viewportWidth / _viewportHeight, 0.1f, 100.0f);
+
+	ourShader.SetMatrix("view", _view);
+	ourShader.SetMatrix("projection", _projection);
+	
+	glm::vec3 _cubePositions[] = {
+		glm::vec3( 0.0f,  0.0f,  0.0f),
+		glm::vec3( 2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3( 2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3( 1.3f, -2.0f, -2.5f),
+		glm::vec3( 1.5f,  2.0f, -2.5f),
+		glm::vec3( 1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
 	while (!glfwWindowShouldClose(_window))
 	{
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		processInput(_window);
 
 		ourShader.Use();
-		glm::mat4 _trans(1.0f);
-		_trans = glm::translate(_trans, glm::vec3(0.5f, -0.5f, 0.0f));
-		_trans = glm::rotate(_trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-		ourShader.SetMatrix("Transform", _trans);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _contTextureID);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, _faceTextureID);
 
 		glBindVertexArray(_VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		for (int _currentCube = 0; _currentCube < 10; _currentCube++)
+		{
+			glm::mat4 _model(1.0f);
+			_model = glm::translate(_model, _cubePositions[_currentCube]);
+			float _angle = 20.0f * _currentCube;
+			_model = glm::rotate(_model, glm::radians(_angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			ourShader.SetMatrix("model", _model);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(_window);
