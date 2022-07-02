@@ -16,7 +16,7 @@ glm::mat4 p_projection;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
-	p_projection = glm::perspective(glm::radians(90.0f), (float)(width / height), 0.1f, 100.0f);
+	p_projection = glm::perspective(glm::radians(45.0f), (float)(width / height), 0.1f, 100.0f);
 }
 
 void processInput(GLFWwindow* window)
@@ -188,8 +188,8 @@ int main()
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glm::mat4 _view(1.0f);
-	_view = glm::translate(_view, glm::vec3(0.0f, 0.0f, -3.0f));
-	p_projection = glm::perspective(glm::radians(90.0f), _viewportWidth / _viewportHeight, 0.1f, 100.0f);
+	_view = glm::translate(_view, glm::vec3(0.0f, -1.0f, -3.0f));
+	p_projection = glm::perspective(glm::radians(45.0f), _viewportWidth / _viewportHeight, 0.1f, 100.0f);
 
 	ourShader.SetMatrix("view", _view);
 	
