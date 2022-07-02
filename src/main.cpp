@@ -188,7 +188,7 @@ int main()
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glm::mat4 _view(1.0f);
-	_view = glm::translate(_view, glm::vec3(0.0f, -1.0f, -3.0f));
+	_view = glm::translate(_view, glm::vec3(0.0f, 0.0f, -3.0f));
 	p_projection = glm::perspective(glm::radians(45.0f), _viewportWidth / _viewportHeight, 0.1f, 100.0f);
 
 	ourShader.SetMatrix("view", _view);
@@ -225,6 +225,10 @@ int main()
 			glm::mat4 _model(1.0f);
 			_model = glm::translate(_model, _cubePositions[_currentCube]);
 			float _angle = 20.0f * _currentCube;
+			if (_currentCube % 3 == 0)
+			{
+				_angle = 20.0f * glfwGetTime();
+			}
 			_model = glm::rotate(_model, glm::radians(_angle), glm::vec3(1.0f, 0.3f, 0.5f));
 			ourShader.SetMatrix("model", _model);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
