@@ -11,9 +11,12 @@
 #include "graphics/Shader.h"
 #include "graphics/ImageImpl.h"
 
+glm::mat4 p_projection;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+	p_projection = glm::perspective(glm::radians(90.0f), (float)(width / height), 0.1f, 100.0f);
 }
 
 void processInput(GLFWwindow* window)
@@ -26,8 +29,6 @@ void processInput(GLFWwindow* window)
 
 int main()
 {
-	
-	
 	if (glfwInit() == GLFW_FALSE)
 	{
 		std::cout << "Error initializing GLFW. Exiting.";
@@ -188,12 +189,9 @@ int main()
 
 	glm::mat4 _view(1.0f);
 	_view = glm::translate(_view, glm::vec3(0.0f, 0.0f, -3.0f));
-
-	glm::mat4 _projection;
-	_projection = glm::perspective(glm::radians(45.0f), _viewportWidth / _viewportHeight, 0.1f, 100.0f);
+	p_projection = glm::perspective(glm::radians(90.0f), _viewportWidth / _viewportHeight, 0.1f, 100.0f);
 
 	ourShader.SetMatrix("view", _view);
-	ourShader.SetMatrix("projection", _projection);
 	
 	glm::vec3 _cubePositions[] = {
 		glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -219,6 +217,7 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, _faceTextureID);
 
+		ourShader.SetMatrix("projection", p_projection);
 		glBindVertexArray(_VAO);
 		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		for (int _currentCube = 0; _currentCube < 10; _currentCube++)
