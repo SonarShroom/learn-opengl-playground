@@ -2,7 +2,7 @@ cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0076 NEW)
 
 project(LearnOpenGLPlayground
-	VERSION 0.0.7
+	VERSION 0.0.8
 	LANGUAGES C CXX
 )
 cmake_minimum_required(VERSION 3.11)
