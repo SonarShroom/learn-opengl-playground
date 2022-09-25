@@ -10,6 +10,13 @@
 
 #include "graphics/Shader.h"
 #include "graphics/ImageImpl.h"
+#include "scene/Camera.h"
+
+Scene::Camera p_mainCamera;
+
+float p_lastCursorX = 400.0f, p_lastCursorY = 300.0f;
+
+float p_deltaTime(0.0f);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -22,12 +29,57 @@ void processInput(GLFWwindow* window)
 	{
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
+
+	auto _cameraFrameSpeed = (p_mainCamera.GetSpeed() * p_deltaTime);
+	auto _cameraPos = p_mainCamera.GetPosition();
+	auto _cameraForward = p_mainCamera.GetForward();
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		p_mainCamera.SetPosition(_cameraPos + _cameraForward * _cameraFrameSpeed);
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		p_mainCamera.SetPosition(_cameraPos - _cameraForward * _cameraFrameSpeed);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		p_mainCamera.SetPosition(_cameraPos + glm::normalize(glm::cross(_cameraForward, Scene::Camera::WORLD_UP)) * _cameraFrameSpeed);
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		p_mainCamera.SetPosition(_cameraPos - glm::normalize(glm::cross(_cameraForward, Scene::Camera::WORLD_UP)) * _cameraFrameSpeed);
+	}
+}
+
+void processMouse(GLFWwindow* window, double xPos, double yPos)
+{
+	static bool _firstPass = true;
+	if (_firstPass)
+	{
+		p_lastCursorX = xPos;
+		p_lastCursorY = yPos;
+		_firstPass = false;
+	}
+	float _cursorXOffset = xPos - p_lastCursorX;
+	float _cursorYOffset = p_lastCursorY - yPos;
+	p_lastCursorX = xPos;
+	p_lastCursorY = yPos;
+	
+	constexpr float _sensitivity = 0.1f;
+	_cursorXOffset *= _sensitivity;
+	_cursorYOffset *= _sensitivity;
+	
+	p_mainCamera.Rotate({_cursorXOffset, _cursorYOffset});
+}
+
+void processMouseScroll(GLFWwindow* window, double xScroll, double yScroll)
+{
+	p_mainCamera.Zoom(yScroll);
 }
 
 int main()
 {
-	
-	
 	if (glfwInit() == GLFW_FALSE)
 	{
 		std::cout << "Error initializing GLFW. Exiting.";
@@ -60,7 +112,10 @@ int main()
 	glViewport(0, 0, _viewportWidth, _viewportHeight);
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(.2f, .3f, .3f, .0f);
+	glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(_window, processMouse);
+	glfwSetScrollCallback(_window, processMouseScroll);
 	
 	/*float _vertices[] = {
 		0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,		// Top right
@@ -187,14 +242,9 @@ int main()
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glm::mat4 _view(1.0f);
-	_view = glm::translate(_view, glm::vec3(0.0f, 0.0f, -3.0f));
 
-	glm::mat4 _projection;
-	_projection = glm::perspective(glm::radians(45.0f), _viewportWidth / _viewportHeight, 0.1f, 100.0f);
+	glm::mat4 _projection(0.0f);
 
-	ourShader.SetMatrix("view", _view);
-	ourShader.SetMatrix("projection", _projection);
-	
 	glm::vec3 _cubePositions[] = {
 		glm::vec3( 0.0f,  0.0f,  0.0f),
 		glm::vec3( 2.0f,  5.0f, -15.0f),
@@ -208,12 +258,17 @@ int main()
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+	float _frameStartTime = 0.0f;
+	float _currentTime = glfwGetTime();
 	while (!glfwWindowShouldClose(_window))
 	{
+		_frameStartTime = _currentTime;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		processInput(_window);
 
 		ourShader.Use();
+		ourShader.SetMatrix("projection", p_mainCamera.GetProjectionMatrix());
+		ourShader.SetMatrix("view", p_mainCamera.GetViewMatrix());
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _contTextureID);
 		glActiveTexture(GL_TEXTURE1);
@@ -234,6 +289,8 @@ int main()
 
 		glfwSwapBuffers(_window);
 		glfwPollEvents();
+		_currentTime = glfwGetTime();
+		p_deltaTime = _currentTime - _frameStartTime;
 	}
 	
 	glfwTerminate();
