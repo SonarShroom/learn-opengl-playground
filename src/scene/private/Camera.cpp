@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "glm/gtc/matrix_access.hpp"
+
 namespace Scene
 {
 
@@ -53,6 +55,22 @@ void Camera::SetFoV(const float newFoV)
 void Camera::Zoom(const float fovDiff)
 {
 	SetFoV(fieldOfView - fovDiff);
+}
+
+glm::mat4 LookAt(const glm::vec3& pos, const glm::vec3& target, const glm::vec3& worldUp)
+{
+	auto _inverseDirection = glm::normalize(pos - target);
+	auto _rightVector = glm::normalize(glm::cross(worldUp, _inverseDirection));
+	auto _upVector = glm::normalize(glm::cross(_inverseDirection, _rightVector));
+	
+	glm::mat4 _position = glm::mat4(1.0f);
+	_position = glm::translate(_position, -pos);
+	glm::mat4 _lookAtRotation = glm::mat4(1.0f);
+	_lookAtRotation = glm::column(_lookAtRotation, 0, glm::vec4(_rightVector, 0.0f));
+	_lookAtRotation = glm::column(_lookAtRotation, 1, glm::vec4(_upVector, 0.0f));
+	_lookAtRotation = glm::column(_lookAtRotation, 2, glm::vec4(_inverseDirection, 0.0f));
+	_lookAtRotation = glm::transpose(_lookAtRotation);
+	return _lookAtRotation * _position;
 }
 
 glm::mat4 Camera::GetViewMatrix() const
