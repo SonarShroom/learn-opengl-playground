@@ -10,15 +10,11 @@
 
 #include "graphics/Shader.h"
 #include "graphics/ImageImpl.h"
+#include "scene/Camera.h"
+
+Scene::Camera p_mainCamera;
 
 float p_lastCursorX = 400.0f, p_lastCursorY = 300.0f;
-float p_cameraFoV = 45.0f;
-
-glm::vec3 p_cameraPos(0.0f, 0.0f, 3.0f);
-glm::vec3 p_cameraFront(0.0f, 0.0f, -1.0f);
-glm::vec3 p_cameraUp(0.0f, 1.0f, 0.0f);
-glm::vec3 p_cameraEulerAngles(0.0f, -90.0f, 0.0f);
-constexpr float p_cameraSpeed(10.0f);
 
 float p_deltaTime(0.0f);
 
@@ -34,23 +30,25 @@ void processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
 
-	float _cameraFrameSpeed = (p_cameraSpeed * p_deltaTime);
+	auto _cameraFrameSpeed = (p_mainCamera.GetSpeed() * p_deltaTime);
+	auto _cameraPos = p_mainCamera.GetPosition();
+	auto _cameraForward = p_mainCamera.GetForward();
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		p_cameraPos += p_cameraFront * _cameraFrameSpeed;
+		p_mainCamera.SetPosition(_cameraPos + _cameraForward * _cameraFrameSpeed);
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		p_cameraPos -= p_cameraFront * _cameraFrameSpeed;
+		p_mainCamera.SetPosition(_cameraPos - _cameraForward * _cameraFrameSpeed);
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		p_cameraPos += glm::normalize(glm::cross(p_cameraFront, p_cameraUp)) * _cameraFrameSpeed;
+		p_mainCamera.SetPosition(_cameraPos + glm::normalize(glm::cross(_cameraForward, Scene::Camera::WORLD_UP)) * _cameraFrameSpeed);
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		p_cameraPos -= glm::normalize(glm::cross(p_cameraFront, p_cameraUp)) * _cameraFrameSpeed;
+		p_mainCamera.SetPosition(_cameraPos - glm::normalize(glm::cross(_cameraForward, Scene::Camera::WORLD_UP)) * _cameraFrameSpeed);
 	}
 }
 
@@ -72,29 +70,12 @@ void processMouse(GLFWwindow* window, double xPos, double yPos)
 	_cursorXOffset *= _sensitivity;
 	_cursorYOffset *= _sensitivity;
 	
-	p_cameraEulerAngles.y += _cursorXOffset; // Y Axis rotation is the yaw, otherwise known as left/right rotation.
-	p_cameraEulerAngles.x += _cursorYOffset; // X Axis rotation is the pitch, otherwise known as up/down rotation.
-	if (p_cameraEulerAngles.x > 89.0f)
-	{
-		p_cameraEulerAngles.x = 89.0f;
-	}
-	else if (p_cameraEulerAngles.x < -89.0f)
-	{
-		p_cameraEulerAngles.x = -89.0f;
-	}
+	p_mainCamera.Rotate({_cursorXOffset, _cursorYOffset});
 }
 
 void processMouseScroll(GLFWwindow* window, double xScroll, double yScroll)
 {
-	p_cameraFoV -= yScroll;
-	if (p_cameraFoV < 1.0f)
-	{
-		p_cameraFoV = 1.0f;
-	}
-	else if (p_cameraFoV > 45.0f)
-	{
-		p_cameraFoV = 45.0f;
-	}
+	p_mainCamera.Zoom(yScroll);
 }
 
 int main()
@@ -131,7 +112,7 @@ int main()
 	glViewport(0, 0, _viewportWidth, _viewportHeight);
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(.2f, .3f, .3f, .0f);
-	glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(_window, processMouse);
 	glfwSetScrollCallback(_window, processMouseScroll);
@@ -264,7 +245,6 @@ int main()
 
 	glm::mat4 _projection(0.0f);
 
-	
 	glm::vec3 _cubePositions[] = {
 		glm::vec3( 0.0f,  0.0f,  0.0f),
 		glm::vec3( 2.0f,  5.0f, -15.0f),
@@ -287,15 +267,8 @@ int main()
 		processInput(_window);
 
 		ourShader.Use();
-		glm::vec3 _cameraDirection(0.0f);
-		_cameraDirection.x = std::cos(glm::radians(p_cameraEulerAngles.y)) * std::cos(glm::radians(p_cameraEulerAngles.x));
-		_cameraDirection.y = std::sin(glm::radians(p_cameraEulerAngles.x));
-		_cameraDirection.z = std::sin(glm::radians(p_cameraEulerAngles.y)) * std::cos(glm::radians(p_cameraEulerAngles.x));
-		p_cameraFront = glm::normalize(_cameraDirection);
-		_view = glm::lookAt(p_cameraPos, p_cameraPos + p_cameraFront, p_cameraUp);
-		_projection = glm::perspective(glm::radians(p_cameraFoV), _viewportWidth / _viewportHeight, 0.1f, 100.0f);
-		ourShader.SetMatrix("projection", _projection);
-		ourShader.SetMatrix("view", _view);
+		ourShader.SetMatrix("projection", p_mainCamera.GetProjectionMatrix());
+		ourShader.SetMatrix("view", p_mainCamera.GetViewMatrix());
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _contTextureID);
 		glActiveTexture(GL_TEXTURE1);
