@@ -33,6 +33,7 @@ void processInput(GLFWwindow* window)
 	auto _cameraFrameSpeed = (p_mainCamera.GetSpeed() * p_deltaTime);
 	auto _cameraPos = p_mainCamera.GetPosition();
 	auto _cameraForward = p_mainCamera.GetForward();
+	_cameraForward.y = 0.0f;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		p_mainCamera.SetPosition(_cameraPos + _cameraForward * _cameraFrameSpeed);
