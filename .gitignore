@@ -1,2 +1,5 @@
 # Build output
 build/
+
+# IDE/Code Editor files
+.vscode/
