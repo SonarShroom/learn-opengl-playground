@@ -17,6 +17,8 @@ public:
 	void SetBool(const std::string& propertyName, bool value);
 	void SetInt(const std::string& propertyName, int value);
 	void SetFloat(const std::string& propertyName, float value);
+	void SetVec3(const std::string& propertyName, float valX, float valY, float valZ);
+	void SetVec3(const std::string& propertyName, glm::vec3 value);
 	void SetMatrix(const std::string& propertyName, glm::mat4 value);
 
 private:

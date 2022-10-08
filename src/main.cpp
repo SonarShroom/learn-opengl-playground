@@ -12,6 +12,8 @@
 #include "graphics/ImageImpl.h"
 #include "scene/Camera.h"
 
+glm::vec3 p_lightPos(1.2f, 1.0f, 2.0f);
+
 Scene::Camera p_mainCamera;
 
 float p_lastCursorX = 400.0f, p_lastCursorY = 300.0f;
@@ -116,14 +118,7 @@ int main()
 	glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(_window, processMouse);
 	glfwSetScrollCallback(_window, processMouseScroll);
-	
-	/*float _vertices[] = {
-		0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,		// Top right
-		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,	// Bot right
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,	// Bot left
-		-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f		// Top left
-	};*/
-	
+
 	float _vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -167,11 +162,12 @@ int main()
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
+
 	unsigned int _indices[] = {
 		0, 1, 3,
 		1, 2, 3
 	};
-
+	
 	unsigned int _VAO = 0;
 	glGenVertexArrays(1, &_VAO);
 	glBindVertexArray(_VAO);
@@ -181,17 +177,10 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices), _vertices, GL_STATIC_DRAW);
 
-	//unsigned int _EBO = 0;
-	//glGenBuffers(1, &_EBO);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices), _indices, GL_STATIC_DRAW);
-
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
-	// glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	// glEnableVertexAttribArray(2);
 
 	stbi_set_flip_vertically_on_load(true);
 	unsigned int _contTextureID = 0;
@@ -229,10 +218,20 @@ int main()
 	}
 	stbi_image_free(_faceTexData);
 
-	Graphics::Shader ourShader("shaders/vertShader.vert", "shaders/fragShader.frag");
-	ourShader.Use();
-	ourShader.SetInt("Texture1", 0);
-	ourShader.SetInt("Texture2", 1);
+	Graphics::Shader lightingShader("shaders/lightVertShader.vert", "shaders/lightFragShader.frag");
+	lightingShader.Use();
+
+	Graphics::Shader lightCubeShader("shaders/lightVertShader.vert", "shaders/lightCubeFragShader.frag");
+	lightCubeShader.Use();
+	
+	unsigned int _lightVAO = 0;
+	glGenVertexArrays(1, &_lightVAO);
+	glBindVertexArray(_lightVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, _VBO); // The cube's local coords are the same, we are just not using the texture coords.
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 
 	// Would this be necessary in real apps?
 	glBindVertexArray(0);
@@ -245,19 +244,6 @@ int main()
 
 	glm::mat4 _projection(0.0f);
 
-	glm::vec3 _cubePositions[] = {
-		glm::vec3( 0.0f,  0.0f,  0.0f),
-		glm::vec3( 2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3( 2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3( 1.3f, -2.0f, -2.5f),
-		glm::vec3( 1.5f,  2.0f, -2.5f),
-		glm::vec3( 1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
-
 	float _frameStartTime = 0.0f;
 	float _currentTime = glfwGetTime();
 	while (!glfwWindowShouldClose(_window))
@@ -265,26 +251,32 @@ int main()
 		_frameStartTime = _currentTime;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		processInput(_window);
-
-		ourShader.Use();
-		ourShader.SetMatrix("projection", p_mainCamera.GetProjectionMatrix());
-		ourShader.SetMatrix("view", p_mainCamera.GetViewMatrix());
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, _contTextureID);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, _faceTextureID);
-
+		
 		glBindVertexArray(_VAO);
-		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		for (int _currentCube = 0; _currentCube < 10; _currentCube++)
-		{
-			glm::mat4 _model(1.0f);
-			_model = glm::translate(_model, _cubePositions[_currentCube]);
-			float _angle = 20.0f * _currentCube;
-			_model = glm::rotate(_model, glm::radians(_angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			ourShader.SetMatrix("model", _model);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		lightingShader.Use();
+		lightingShader.SetVec3("objectCol", glm::vec3(1.0f, 0.5f, 0.31f));
+		lightingShader.SetVec3("lightCol", glm::vec3(1.0f, 1.0f, 1.0f));
+		glm::mat4 _cubeModel(1.0f);
+		lightingShader.SetMatrix("model", _cubeModel);
+		lightingShader.SetMatrix("projection", p_mainCamera.GetProjectionMatrix());
+		lightingShader.SetMatrix("view", p_mainCamera.GetViewMatrix());
+		// glActiveTexture(GL_TEXTURE0);
+		// glBindTexture(GL_TEXTURE_2D, _contTextureID);
+		// glActiveTexture(GL_TEXTURE1);
+		// glBindTexture(GL_TEXTURE_2D, _faceTextureID);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		glm::mat4 _lightModel(1.0f);
+		_lightModel = glm::translate(_lightModel, p_lightPos);
+		_lightModel = glm::scale(_lightModel, glm::vec3(0.2f));
+		lightCubeShader.Use();
+		lightCubeShader.SetVec3("lightCol", glm::vec3(1.0f, 1.0f, 1.0f));
+		lightCubeShader.SetMatrix("projection", p_mainCamera.GetProjectionMatrix());
+		lightCubeShader.SetMatrix("view", p_mainCamera.GetViewMatrix());
+		lightCubeShader.SetMatrix("model", _lightModel);
+		glBindVertexArray(_lightVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(_window);
