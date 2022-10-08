@@ -2,7 +2,7 @@ cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0076 NEW)
 
 project(LearnOpenGLPlayground
-	VERSION 1.0.0
+	VERSION 1.0.1
 	LANGUAGES C CXX
 )
 cmake_minimum_required(VERSION 3.11)
@@ -55,7 +55,10 @@ target_link_libraries(${PROJECT_NAME}
 install(
 	FILES
 	shaders/vertShader.vert
+	shaders/lightVertShader.vert
 	shaders/fragShader.frag
+	shaders/lightFragShader.frag
+	shaders/lightCubeFragShader.frag
 	DESTINATION
 	${CMAKE_CURRENT_BINARY_DIR}/shaders
 )
