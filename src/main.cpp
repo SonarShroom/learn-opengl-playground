@@ -12,6 +12,7 @@
 #include "graphics/ImageImpl.h"
 #include "scene/Camera.h"
 
+constexpr float p_lightMovementRadius = 2.0f;
 glm::vec3 p_lightPos(1.2f, 1.0f, 2.0f);
 
 Scene::Camera p_mainCamera;
@@ -249,13 +250,15 @@ int main()
 		_frameStartTime = _currentTime;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		processInput(_window);
-		
+
+		p_lightPos.x = std::cos(_currentTime) * p_lightMovementRadius;
+		p_lightPos.z = std::sin(_currentTime) * p_lightMovementRadius;
+
 		lightingShader.Use();
 		lightingShader.SetVec3("objectCol", glm::vec3(1.0f, 0.5f, 0.31f));
 		lightingShader.SetVec3("lightPos", p_lightPos);
 		lightingShader.SetVec3("lightCol", glm::vec3(1.0f, 1.0f, 1.0f));
 		lightingShader.SetVec3("viewPos", p_mainCamera.GetPosition());
-		std::cout << "Camera pos: " << p_mainCamera.GetPosition().x << ", " << p_mainCamera.GetPosition().y << ", " << p_mainCamera.GetPosition().z << std::endl;
 		glm::mat4 _cubeModel(1.0f);
 		lightingShader.SetMatrix("model", _cubeModel);
 		lightingShader.SetMatrix("projection", p_mainCamera.GetProjectionMatrix());
