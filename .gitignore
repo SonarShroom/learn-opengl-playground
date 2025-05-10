@@ -2,4 +2,5 @@
 build/
 
 # IDE/Code Editor files
+.vs/
 .vscode/
